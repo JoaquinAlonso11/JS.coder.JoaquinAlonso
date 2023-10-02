@@ -20,13 +20,13 @@ function calcularSeguro(edad, categoria) {
     }
   
     // Aplicar un aumento si el usuario es menor de 25 años
-    if (edad <= 25 >= 18) {
+    if (edad <= 25 && edad >= 18) {
       precioBase *= 1.2; // Incremento del 20%
     } else if (edad < 18) {
         alert("Debes ser mayor de edad para contratar un seguro");
         return 0;
     }
-
+    
     return precioBase;
   }
   
