@@ -1,51 +1,82 @@
+const catEconomica = 100;
+const catEstandar = 150;
+const catPremium = 200;
 
-// Función para calcular el precio del seguro
-function calcularSeguro(edad, categoria) {
-    let precioBase;
-  
-    // Determinar el precio base según la categoría
-    switch (categoria) {
-      case "Economica":
-        precioBase = 100;
-        break;
-      case "Estandar":
-        precioBase = 150;
-        break;
-      case "Premium":
-        precioBase = 200;
-        break;
-      default:
-        alert("Categoría de seguro no válida.");
-        return 0;
+const aumentoMenores25 = 1.2;
+
+function obtenerEdad() {
+  let edad;
+  while (true) {
+    edad = prompt("Ingresa tu edad:");
+    if (edad === null) {
+      alert("Operación cancelada por el usuario.");
+      return null;
     }
-  
-    // Aplicar un aumento si el usuario es menor de 25 años
-    if (edad <= 25 && edad >= 18) {
-      precioBase *= 1.2; // Incremento del 20%
-    } else if (edad < 18) {
-        alert("Debes ser mayor de edad para contratar un seguro");
-        return 0;
+    if (!isNaN(edad)) { // Verificar si es un valor numérico
+      return edad;
+    } else {
+      alert("Debes ingresar un valor numérico.");
     }
-    
+  }
+}
+
+function obtenerCategoria() {
+  const categoria = prompt("Ingresa la categoría de seguro (Economica, Estandar, Premium):");
+  if (categoria === null) {
+    alert("Operación cancelada por el usuario.");
+    return null;
+  }
+  const categoriaEnMinusculas = categoria.toLowerCase();
+  if (categoriaEnMinusculas === "economica" || categoriaEnMinusculas === "estandar" || categoriaEnMinusculas === "premium") {
+    return categoriaEnMinusculas;
+  } else {
+    alert("Categoría de seguro no válida.");
+    return null;
+  }
+  
+}
+
+function calcularPrecioBase(categoria) {
+  switch (categoria) {
+    case "economica":
+      return catEconomica;
+    case "estandar":
+      return catEstandar;
+    case "premium":
+      return catPremium;
+    default:
+      return 0;
+  }
+}
+
+function aplicarAumentoMenores25(edad, precioBase) {
+  if (edad <= 25 && edad >= 18) {
+    return precioBase * aumentoMenores25; 
+  } else {
     return precioBase;
   }
-  
-  // Ciclo para solicitar datos y calcular el seguro
-  while (true) {
-    const edad = parseInt(prompt("Ingresa tu edad:"));
-    const categoria = prompt("Ingresa la categoría de seguro (Economica, Estandar, Premium):");
-  
-    // Calcular el precio del seguro
-    const precioSeguro = calcularSeguro(edad, categoria);
+}
 
+function calcularSeguro() {
+  const edad = obtenerEdad();
+  if (edad === null) return;
 
-  
-    if (precioSeguro > 0) {
-        alert(`El precio del seguro es: $${precioSeguro} anuales`);
-        alert(`Gracias por utilizar nuestro cotizador de seguros`);
-      break; 
-    }
+  const categoria = obtenerCategoria();
+  if (categoria === null) return;
+
+  const precioBase = calcularPrecioBase(categoria);
+
+  if (precioBase === 0) {
+    alert("Categoría de seguro no válida.");
+    return;
   }
-  
 
-  
+  const precioFinal = aplicarAumentoMenores25(parseInt(edad), precioBase);
+
+  if (precioFinal > 0) {
+    alert(`El precio del seguro es: $${precioFinal} anuales`);
+    alert(`Gracias por utilizar nuestro cotizador de seguros`);
+  }
+}
+
+calcularSeguro();
