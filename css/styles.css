@@ -27,6 +27,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-direction: column;
 }
 .formContainer {
     display: flex;
@@ -83,6 +84,7 @@ label {
 
 .radioBoton {
     cursor: pointer;
+        
 }
 .headerPrincipal {
     color: white;
@@ -132,6 +134,35 @@ button:hover {
 #borrarSessionStorage:hover {
     color: white;
     
+    transition: ease-out 0.2s;
+    -webkit-transition: ease-out 0.2s;
+    -moz-transition: ease-out 0.2s;
+    -ms-transition: ease-out 0.2s;
+    -o-transition: ease-out 0.2s;
+}
+
+.site-footer {
+    cursor: pointer;
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-shadow: #0081cf 2px 2px 4px;
+    margin-top: 3rem;
+
+}
+
+
+#botonGitHub {
+    color: white;
+    text-decoration: none;
+}
+.fa-github:before {
+    margin-left: 5px;
+}
+
+#botonGitHub:hover {
+
+    color: #00A4DE;
     transition: ease-out 0.2s;
     -webkit-transition: ease-out 0.2s;
     -moz-transition: ease-out 0.2s;

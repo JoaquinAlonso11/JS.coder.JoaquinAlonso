@@ -14,7 +14,6 @@ async function cargarDatosDesdeJSON() {
     // Actualizar las propiedades con los datos obtenidos
     config.categoriasSeguro = data.categoriasSeguro;
     config.aumentos = data.aumentos;
-    config.mensajes = data.mensajes;
   } catch (error) {
     console.error("Error al cargar datos desde data.json", error);
   }
@@ -77,17 +76,29 @@ if (cuotasCallValue !== null) {
 
     calcularSeguro();
     const edad = obtenerEdad();
-      if (edad !== null) {
-        Swal.fire({
-          title: "Exitos!",
-          text: "Hemos cotizado un seguro a tu medida",
-          icon: "success"
-        });
-    if (checkboxChecked) {
-        const comparacion = mostrarComparacion(edad);
-        resultContainer.innerHTML += `<br><br><p><strong>Comparación de seguros:</strong></p><br>${comparacion}`;
-      }
-    }
+const categoria = obtenerCategoria();
+
+if (edad === null) {
+  Swal.fire({
+    title: "Ingresa una edad valida",
+    icon: "error"
+  });
+} else if (categoria === null) {
+  Swal.fire({
+    title: "Selecciona una categoria valida",
+    icon: "error"
+  });
+} else {
+  Swal.fire({
+    title: "Exitos!",
+    text: "Hemos cotizado un seguro a tu medida",
+    icon: "success"
+  });
+  if (checkboxChecked) {
+    const comparacion = mostrarComparacion(edad);
+    resultContainer.innerHTML += `<br><br><p><strong>Comparación de seguros:</strong></p><br>${comparacion}`;
+  }
+}
   }); 
 
 
@@ -96,19 +107,13 @@ function obtenerEdad() {
   const edadInput = document.getElementById("age");
   const edad = parseInt(edadInput.value);
 
-  if (isNaN(edad) || edad < 18) {
-    Swal.fire({
-      title: "Ingresa una edad valida",
-      icon: "error"
-    });
+  if (isNaN(edad) || edad < 18 || edad > 110) {
+    
     return null;
   }
 
   if (!edadInput.value.trim()) {
-    Swal.fire({
-      title: "Ingresa una edad valida",
-      icon: "error"
-    });
+    
     return null;
   }
 
@@ -122,11 +127,7 @@ function obtenerCategoria() {
 
   if (categoriaSeleccionada) {
     return categoriaSeleccionada;
-  } else  {
-    Swal.fire({
-      title: "Selecciona una categoria valida",
-      icon: "error"
-    });
+  } else {
     return null;
   }
 }
@@ -199,11 +200,6 @@ function calcularSeguro() {
 
   const cuotas = obtenerCuotas();
   if (cuotas === null) {
-    // Mostrar alerta indicando que se debe seleccionar una cantidad de cuotas
-    Swal.fire({
-      title: "Selecciona la cantidad de cuotas",
-      icon: "warning"
-    });
     return; 
   }
 
@@ -218,7 +214,7 @@ function calcularSeguro() {
     const resultContainer = document.getElementById("resultContainer");
     resultContainer.innerHTML = `<strong><p>El precio del seguro es:</strong></p><br> U$D ${precioFinal} anuales<br><br>`;
     const valorCuota = (precioFinal / cuotas).toFixed(2);
-    resultContainer.innerHTML += `<p><strong>Valor de la cuota:</strong></p><br> U$D ${valorCuota} (en ${cuotas} cuotas)<br><br>`;
+    resultContainer.innerHTML += `<p><strong>Valor de la cuota:</strong></p><br> U$D ${valorCuota} (cuotas:${cuotas})<br><br>`;
     
 
     // Obtener la cadena de comparación
