@@ -1,22 +1,38 @@
+const config = {
+  dataUrl: "data.json",
+  categoriasSeguro: {},
+  aumentos: {},
+  mensajes: {}
+};
+
+// Función para cargar datos desde data.json
+async function cargarDatosDesdeJSON() {
+  try {
+    const response = await fetch(config.dataUrl);
+    const data = await response.json();
+
+    // Actualizar las propiedades con los datos obtenidos
+    config.categoriasSeguro = data.categoriasSeguro;
+    config.aumentos = data.aumentos;
+    config.mensajes = data.mensajes;
+  } catch (error) {
+    console.error("Error al cargar datos desde data.json", error);
+  }
+}
+
+// Llama a la función para cargar datos cuando se carga la página
+document.addEventListener("DOMContentLoaded", cargarDatosDesdeJSON);
+
 const resultContainer = document.getElementById("resultContainer");
 
-const categoriasSeguro = {
-  economica: 100,
-  estandar: 150,
-  premium: 200,
-};
 
-const aumentos = {
-  menores25: 1.2,
-  mayores65: 1.15,
-};
 // Variable global para rastrear el estado del checkbox
 let checkboxChecked = false;
 const compareCheckbox = document.getElementById("compare");
 
 compareCheckbox.addEventListener("change", function() {
   checkboxChecked = compareCheckbox.checked;
-   sessionStorage.setItem("checkboxState", checkboxChecked);
+  sessionStorage.setItem("checkboxState", checkboxChecked);
 });
 
 document.addEventListener("DOMContentLoaded", function() {
@@ -35,14 +51,17 @@ document.addEventListener("DOMContentLoaded", function() {
     sessionStorage.setItem("categoriaSelectValue", categoriaSelect.value);
   });
 
-  cuotasCall.addEventListener("input", function() {
+  cuotasCall.addEventListener("change", function() {
     sessionStorage.setItem("cuotasCallValue", cuotasCall.value);
   });
 
   // Cargar los valores almacenados en el sessionStorage si existen
   ageInput.value = sessionStorage.getItem("ageInputValue");
   categoriaSelect.value = sessionStorage.getItem("categoriaSelectValue");
-  cuotasCall.value = sessionStorage.getItem("cuotasCallValue");
+  let cuotasCallValue = sessionStorage.getItem("cuotasCallValue");
+if (cuotasCallValue !== null) {
+  cuotasCall.value = cuotasCallValue;
+}
 
 
   const storedCheckboxState = sessionStorage.getItem("checkboxState");
@@ -54,12 +73,17 @@ document.addEventListener("DOMContentLoaded", function() {
   const submitButton = document.getElementById("submit");
   submitButton.addEventListener("click", function(event) {
     event.preventDefault(); // Evitar que la página se recargue
+    
 
     calcularSeguro();
-    if (checkboxChecked) {
-      const edad = obtenerEdad();
+    const edad = obtenerEdad();
       if (edad !== null) {
-        
+        Swal.fire({
+          title: "Exitos!",
+          text: "Hemos cotizado un seguro a tu medida",
+          icon: "success"
+        });
+    if (checkboxChecked) {
         const comparacion = mostrarComparacion(edad);
         resultContainer.innerHTML += `<br><br><p><strong>Comparación de seguros:</strong></p><br>${comparacion}`;
       }
@@ -69,18 +93,26 @@ document.addEventListener("DOMContentLoaded", function() {
 
 // Funcion para Obtener la edad
 function obtenerEdad() {
-  let edadInput = document.getElementById("age");
-  while (true) {
-    const edad = edadInput.value;
-    if (edad === null) {
-      return null;
-    } else if(edad < 18) {
-      return null;
-    }
-    if (!isNaN(edad)) { 
-      return edad;
-    }
+  const edadInput = document.getElementById("age");
+  const edad = parseInt(edadInput.value);
+
+  if (isNaN(edad) || edad < 18) {
+    Swal.fire({
+      title: "Ingresa una edad valida",
+      icon: "error"
+    });
+    return null;
   }
+
+  if (!edadInput.value.trim()) {
+    Swal.fire({
+      title: "Ingresa una edad valida",
+      icon: "error"
+    });
+    return null;
+  }
+
+  return edad;
 }
 
 //Funcion para obtener la categoria del seguro
@@ -90,22 +122,26 @@ function obtenerCategoria() {
 
   if (categoriaSeleccionada) {
     return categoriaSeleccionada;
-  } else {
+  } else  {
+    Swal.fire({
+      title: "Selecciona una categoria valida",
+      icon: "error"
+    });
     return null;
   }
 }
 
 // FUncion para calcular el precio base de cada categoria
 function calcularPrecioBase(categoria) {
-  return categoriasSeguro[categoria] || 0;
+  return config.categoriasSeguro[categoria] || 0;
 }
 
 //Funcion para aplicar aumentos por edad
 function aplicarAumento(edad, precioBase) {
   if (edad <= 25 && edad >= 18) {
-    return Math.round(precioBase * aumentos.menores25); 
+    return Math.round(precioBase * config.aumentos.menores25); 
   } else if (edad >= 65) {
-    return Math.round(precioBase * aumentos.mayores65);
+    return Math.round(precioBase * config.aumentos.mayores65);
   } else {
     return precioBase;
   }
@@ -113,7 +149,7 @@ function aplicarAumento(edad, precioBase) {
 
 // Función para calcular el precio final del seguro
 function calcularPrecioFinal(categoria, edad) {
-  const precioBase = categoriasSeguro[categoria] || 0;
+  const precioBase = config.categoriasSeguro[categoria] || 0;
   return aplicarAumento(edad, precioBase);
 }
 
@@ -121,7 +157,7 @@ function calcularPrecioFinal(categoria, edad) {
 
 // Función para activar la comparación
 function mostrarComparacion(edad) {
-  const categorias = Object.keys(categoriasSeguro);
+  const categorias = Object.keys(config.categoriasSeguro);
   const preciosComparados = categorias.map(categoria => ({
     categoria,
     precio: calcularPrecioFinal(categoria, edad)
@@ -162,7 +198,14 @@ function calcularSeguro() {
   if (categoria === null) return;
 
   const cuotas = obtenerCuotas();
-  if (cuotas === null) return;
+  if (cuotas === null) {
+    // Mostrar alerta indicando que se debe seleccionar una cantidad de cuotas
+    Swal.fire({
+      title: "Selecciona la cantidad de cuotas",
+      icon: "warning"
+    });
+    return; 
+  }
 
   const precioFinal = calcularPrecioFinal(categoria, edad);
 
@@ -197,22 +240,54 @@ resultContainer.addEventListener("click", function(event) {
 
     ageInput.value = sessionStorage.getItem("ageInputValue") || "";
     categoriaSelect.value = sessionStorage.getItem("categoriaSelectValue") || "";
-    cuotasCall.value = sessionStorage.getItem("cuotasCallValue") || "";
+    cuotasCall.value = sessionStorage.getItem("cuotasCallValue") || "1";
     formularioSeguro.style.display = "flex";
     resultContainer.innerHTML = "";
   }else {
     event.preventDefault();
   }
-  // Limpia los resultados en el contenedor resultContainer
+});
+// Función para borrar el sessionStorage
+const borrarSessionStorage = () => {
+  sessionStorage.clear();
   
+  window.location.reload();
+};
 
-  // Muestra nuevamente el formulario
+// Click para llamar a la función de borrar el sessionStorage
+document.getElementById('borrarSessionStorage').addEventListener('click', (event) => {
+  event.preventDefault(); // Evita que el enlace redireccione
+  let timerInterval;
+Swal.fire({
+  title: "Estamos borrando tus datos!",
+  html: "Cambios efectivos en <b></b> millissegundos.",
+  timer: 1000,
+  timerProgressBar: true,
+  didOpen: () => {
+    Swal.showLoading();
+    const timer = Swal.getPopup().querySelector("b");
+    timerInterval = setInterval(() => {
+      timer.textContent = `${Swal.getTimerLeft()}`;
+    }, 100);
+  },
+  willClose: () => {
+    clearInterval(timerInterval);
+  }
+}).then((result) => {
+  /* Read more about handling dismissals below */
+  if (result.dismiss === Swal.DismissReason.timer) {
+    console.log("I was closed by the timer");
+    borrarSessionStorage();
+  }
+});
   
 });
   }
 }
 
+
 });
+
 
 
 

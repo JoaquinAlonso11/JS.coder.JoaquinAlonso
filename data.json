@@ -1,0 +1,16 @@
+{
+    "categoriasSeguro": {
+    "economica": 120,
+    "estandar": 180,
+    "premium": 240
+    },
+    "aumentos": {
+    "menores25": 1.2,
+    "mayores65": 1.15
+    },
+    "mensajes": {
+    "errorEdad": "La edad debe ser mayor o igual a 18.",
+    "errorCategoria": "Por favor, selecciona una categoría."
+    
+    }
+}
